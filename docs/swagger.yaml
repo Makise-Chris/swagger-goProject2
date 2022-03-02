@@ -1,0 +1,186 @@
+basePath: /
+definitions:
+  main.Authentication:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  main.JsonResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  main.User2SignUp:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      role:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /admin:
+    get:
+      consumes:
+      - application/json
+      description: Lay trang chu Admin
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.JsonResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.JsonResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/main.JsonResponse'
+      summary: Lay trang chu Admin
+      tags:
+      - AdminIndex
+  /admin/delete/{id}:
+    post:
+      consumes:
+      - application/json
+      description: Xoa User
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.JsonResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.JsonResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/main.JsonResponse'
+      summary: Xoa User
+      tags:
+      - DeleteUser
+  /admin/signout:
+    post:
+      consumes:
+      - application/json
+      description: Dang xuat
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.JsonResponse'
+      summary: Dang xuat
+      tags:
+      - SignOut
+  /signin:
+    post:
+      consumes:
+      - application/json
+      description: Dang nhap
+      parameters:
+      - description: Sign In
+        in: body
+        name: signin
+        required: true
+        schema:
+          $ref: '#/definitions/main.Authentication'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.JsonResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.JsonResponse'
+      summary: Dang nhap
+      tags:
+      - SignIn
+  /signup:
+    post:
+      consumes:
+      - application/json
+      description: Dang ky
+      parameters:
+      - description: Sign Up
+        in: body
+        name: signup
+        required: true
+        schema:
+          $ref: '#/definitions/main.User2SignUp'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.JsonResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.JsonResponse'
+      summary: Dang ky
+      tags:
+      - SignUp
+  /user:
+    get:
+      consumes:
+      - application/json
+      description: Lay trang chu User
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.JsonResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.JsonResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/main.JsonResponse'
+      summary: Lay trang chu User
+      tags:
+      - UserIndex
+  /user/signout:
+    post:
+      consumes:
+      - application/json
+      description: Dang xuat
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.JsonResponse'
+      summary: Dang xuat
+      tags:
+      - SignOut
+swagger: "2.0"
