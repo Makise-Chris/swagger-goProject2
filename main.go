@@ -8,6 +8,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"golang.org/x/crypto/bcrypt"
@@ -21,14 +22,15 @@ import (
 var (
 	secretkey  string = "secretkeyjwt"
 	connection *gorm.DB
+	validate   *validator.Validate
 )
 
 type User2 struct {
 	gorm.Model
-	Name     string `json:"name"`
-	Email    string `gorm:"unique" json:"email"`
-	Password string `json:"password"`
-	Role     string `json:"role"`
+	Name     string `json:"name" validate:"required"`
+	Email    string `gorm:"unique" json:"email"  validate:"required,email"`
+	Password string `json:"password" validate:"required"`
+	Role     string `json:"role" validate:"required,oneof=admin user"`
 }
 
 type User2SignUp struct {
@@ -39,8 +41,8 @@ type User2SignUp struct {
 }
 
 type Authentication struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required"`
 }
 
 type JsonResponse struct {
@@ -173,10 +175,25 @@ func IsAuthorized() gin.HandlerFunc {
 //@Router /signup [post]
 func SignUp(c *gin.Context) {
 	var user User2
-	err := c.ShouldBindJSON(&user)
+	c.ShouldBindJSON(&user)
+	err := validate.Struct(user)
 	if err != nil {
+		var message string
+
+		for _, err := range err.(validator.ValidationErrors) {
+			if err.ActualTag() == "required" {
+				message = message + "Nhập thiếu thông tin. "
+			}
+			if err.ActualTag() == "oneof" {
+				message = message + "Nhập sai role (admin hoặc user). "
+			}
+			if err.ActualTag() == "email" {
+				message = message + "Nhập sai định dạng email. "
+			}
+		}
+
 		c.JSON(400, gin.H{
-			"message": err.Error(),
+			"message": message,
 		})
 		return
 	}
@@ -217,10 +234,22 @@ func SignUp(c *gin.Context) {
 //@Router /signin [post]
 func SignIn(c *gin.Context) {
 	var authDetails Authentication
-	err := c.ShouldBindJSON(&authDetails)
+	c.ShouldBindJSON(&authDetails)
+	err := validate.Struct(authDetails)
 	if err != nil {
+		var message string
+
+		for _, err := range err.(validator.ValidationErrors) {
+			if err.ActualTag() == "required" {
+				message = message + "Nhập thiếu thông tin. "
+			}
+			if err.ActualTag() == "email" {
+				message = message + "Nhập sai định dạng email. "
+			}
+		}
+
 		c.JSON(400, gin.H{
-			"message": "Error in reading payload",
+			"message": message,
 		})
 		return
 	}
@@ -377,6 +406,8 @@ func DeleteUser(c *gin.Context) {
 func main() {
 	connection = GetDatabase()
 	defer CloseDatabase(connection)
+
+	validate = validator.New()
 
 	docs.SwaggerInfo.BasePath = "/"
 
